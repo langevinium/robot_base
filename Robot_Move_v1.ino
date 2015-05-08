@@ -77,8 +77,12 @@ const float pi = 3.14159;
 
 // Define pin's aliases
 const int stopPin = 8;
+const int tirette = 11;
+const int led_ready = 12;
+const int led_standby = 13;
 
 // Define some variables
+int tirette_state = 1;            // Will store the state of the tirette.
 int robot_state = STATE_RUNNING;  // Will store the state of the robot.
 int step_current = 0;             // Will store the id of the current step.
 int step_isFinished = true;       // Turn to true when the step is finisehd.
@@ -134,6 +138,12 @@ void setup()
 
   // Init pins
   pinMode(stopPin, INPUT);
+  pinMode(tirette, INPUT_PULLUP);
+  pinMode(led_ready, OUTPUT);
+  pinMode(led_standby, OUTPUT);
+  
+  // Turn on the standby led
+  digitalWrite(led_standby, HIGH);
 
   AFM.begin(); // Start the shield
 
@@ -142,6 +152,21 @@ void setup()
 
   stepperLeft.setMaxSpeed(max_speed);
   stepperLeft.setAcceleration(max_acc);
+  
+  // Stay in a infinit loop while the tirette is missing
+  while (tirette_state == HIGH) {
+    tirette_state = digitalRead(tirette);
+  }
+  
+  // The robot is ready
+  // Turn on the ready led
+  digitalWrite(led_ready, HIGH);
+  
+  // Stay in a infinit loop until the tirette is pulled
+  while (tirette_state == LOW) {
+    tirette_state = digitalRead(tirette);
+  }
+  
 }
 
 /* SECTION FIVE − MAIN LOOP
@@ -257,6 +282,9 @@ void wait(int t)
 void stop_emergency()
 {
   Serial.println("STOP (emergency)");
+  
+  // Turn down the ready led
+  digitalWrite(led_ready, LOW);
 
   robot_state = STATE_STOP;
   myStepperRight->release();
@@ -271,6 +299,9 @@ void stop_emergency()
 void stop_normal()
 {
   Serial.println("STOP (normal)");
+  
+  // Turn down the ready led
+  digitalWrite(led_ready, LOW);
 
   robot_state = STATE_STOP;
   myStepperRight->release();
