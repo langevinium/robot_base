@@ -87,6 +87,7 @@ int robot_state = STATE_RUNNING;  // Will store the state of the robot.
 int step_current = 0;             // Will store the id of the current step.
 int step_isFinished = true;       // Turn to true when the step is finisehd.
 int step_isInited = false;        // Turn to true when the step is initialized.
+int isThereAnObstacle = false;    // Turn to true if an obstacle fronts the robot.
 
 unsigned long currentMillis = 0;  // Will store the current time.
 unsigned long previousMillis = 0; // Will store last timer a timer was launched.
@@ -201,9 +202,17 @@ void loop()
       step_isFinished = false;
     }
 
-    // Run steppers
-    stepperRight.run();
-    stepperLeft.run();
+    // The isThereAnObstacle flag has to be updated
+    // HERE
+    // isThereAnObstacle = true/false
+    
+    // Run steppers only if the way is free
+    // (ie if there is no obstacle)
+    // To work properly, this trick impose slow speed
+    if (~isThereAnObstacle) {
+      stepperRight.run();
+      stepperLeft.run();
+    }
 
     // If the current step is finished, end it.
     if ( (stepperRight.distanceToGo() == 0)
