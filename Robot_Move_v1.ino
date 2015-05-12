@@ -11,7 +11,8 @@
 // TODO
 //  * [x] Fonction avancer/reculer
 //  * [x] Fonction tourner
-//  * [_] Fonction controle précis
+//  * [-] Choix du camp au démarrage
+//  * [_] Détection des obstacles
 
 #include <AccelStepper.h>
 #include <Wire.h>
@@ -28,10 +29,16 @@
 #define P_TURN 1
 #define P_WAIT 2
 
+#define TEAM_GREEN 1
+#define TEAM_YELLOW -1
+
 /* SECTION ONE − DESCRIPTION OF THE ROBOT AND OF THE PATH
  This section is used to define the characteristics of the robot
  and to describe its path. This section is typicaly twisted during the competition.
  */
+
+// Define the team for this round
+const int team = TEAM_GREEN;
 
 // Define characteristics of the robot
 const int stepperLength = 200;         // Number of steps per revolution
@@ -44,6 +51,7 @@ const float max_speed = 200.0;
 const float max_acc = 100.0;
 
 // Define the path
+// The path is defined from the TEAM_GREEN point of view.
 // /!\ Don't forget to update path_length /!\
 //     {move, turn, wait}
 const int path_length = 4;
@@ -76,7 +84,7 @@ const float path[][3] = {
 const float pi = 3.14159;
 
 // Define pin's aliases
-const int stopPin = 8;
+const int stopPin = 10;
 const int tirette = 11;
 const int led_ready = 12;
 const int led_standby = 13;
@@ -259,7 +267,7 @@ void go(float dist_inCm)
 //   - angle: couterclockwise angle in °
 void turn(float angle)
 {
-  int dist_inStep = (angle * pi * width * stepperLength)/(360*circumference);
+  int dist_inStep = team*(angle * pi * width * stepperLength)/(360*circumference);
 
   Serial.print("Turn:\t");
   Serial.print(angle);
